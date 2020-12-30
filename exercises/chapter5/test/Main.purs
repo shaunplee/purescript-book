@@ -2,13 +2,13 @@ module Test.Main where
 
 import Prelude hiding (gcd)
 import Test.MySolutions
-import Test.NoPeeking.Solutions
 
-import ChapterExamples (Amp(..), current, fromString, gcd, gcdV2, isEmpty, livesInLA, lzs, partialFunction, showPerson, showPersonV2, sortPair, takeFive, toString, unknownPerson)
+import Test.NoPeeking.Solutions as Solutions
+import ChapterExamples (Amp(..), current, fromString, gcd, gcdV2, isEmpty, livesInLA, lzs, partialFunction, showPerson, showPersonV2, sortPair, takeFive, toString, unknownPerson, Volt(..), Watt(..))
 import Data.Int (round)
 import Data.Maybe (Maybe(Just, Nothing))
 import Data.Person (Person)
-import Data.Picture (Shape(..), Picture, getCenter, origin)
+import Data.Picture (Shape(..), Picture, getCenter, origin, shapeBounds)
 import Effect (Effect)
 import Test.Unit (TestSuite, suite, test)
 import Test.Unit.Assert as Assert
@@ -112,7 +112,7 @@ Note to reader: Delete this line to expand comment block -}
     suite "Exercise Group - Newtype" do
       test "Exercise - calculateWattage" do
         let
-          (Watt w) = calculateWattage (Ohm 240.0) (Volt 120.0)
+          (MakeWatt w) = calculateWattage (Amp 0.5) (Volt 120.0)
         Assert.equal 60.0 w
     suite "Exercise Group - Vector Graphics" do
       test "Exercise - area" do
