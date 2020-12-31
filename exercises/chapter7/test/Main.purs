@@ -117,6 +117,8 @@ main =
         nonEmptyTest "Houston" true
         nonEmptyTest "My Street" true
         nonEmptyTest "Ñóñá" true
+        nonEmptyTest " Start with whitespace" true
+        nonEmptyTest "End with whitespace " true
         nonEmptyTest "" false
         nonEmptyTest " " false
         nonEmptyTest "\t" false

@@ -86,8 +86,10 @@ lightbulb = Ohm 500.0
 current :: Amp
 current = calculateCurrent battery lightbulb
 
+-- ANCHOR: Coulomb
+newtype Coulomb = MakeCoulomb Number
+-- ANCHOR_END: Coulomb
+
 -- These are to enable testing. Will be explained in Ch6.
 derive newtype instance eqAmp :: Eq Amp
 derive newtype instance showAmp :: Show Amp
-
-newtype Watt = MakeWatt Number
