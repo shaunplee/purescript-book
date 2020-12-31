@@ -2,8 +2,7 @@ module Test.Main where
 
 import Prelude
 import Test.MySolutions
-import Test.NoPeeking.Solutions  -- Note to reader: Delete this line
-import Data.AddressBook (AddressBook, Entry, emptyBook, findEntry, insertEntry)
+import Data.AddressBook (AddressBook, Entry, emptyBook, findEntry, findEntryByStreet, insertEntry, isInBook, removeDuplicates)
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Test.Unit (TestSuite, suite, test)
@@ -49,19 +48,16 @@ otherJohn =
       { street: "678 Fake Rd.", city: "Fakeville", state: "NY" }
   }
 
-
 bookWithDuplicate :: AddressBook
-bookWithDuplicate = 
+bookWithDuplicate =
   insertEntry john
     $ insertEntry otherJohn
-      book
+        book
 
 main :: Effect Unit
 main =
   runTest do
     runChapterExamples
-    {-  Move this block comment starting point to enable more tests
-Note to reader: Delete this line to expand comment block -}
     suite "Exercise - findEntryByStreet" do
       test "Lookup existing" do
         Assert.equal (Just john)
@@ -80,7 +76,8 @@ Note to reader: Delete this line to expand comment block -}
       Assert.equal book
         $ removeDuplicates bookWithDuplicate
 
-{- Note to reader: Delete this line to expand comment block
+{-  Move this block comment starting point to enable more tests
+
 -}
 runChapterExamples :: TestSuite
 runChapterExamples = do
