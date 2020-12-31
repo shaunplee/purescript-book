@@ -314,7 +314,7 @@ Many standard type classes come with their own set of similar laws. The laws giv
 
 ### Deriving Instances
 
-Rather than writing instances manually, you can let the compiler to most of the work for you. Take a look at this [Type Class Deriving guide](https://github.com/purescript/documentation/blob/master/guides/Type-Class-Deriving.md). That information will help you solve the following exercises.
+Rather than writing instances manually, you can let the compiler do most of the work for you. Take a look at this [Type Class Deriving guide](https://github.com/purescript/documentation/blob/master/guides/Type-Class-Deriving.md). That information will help you solve the following exercises.
 
 ## Exercises
 
