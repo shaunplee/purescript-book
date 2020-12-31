@@ -16,7 +16,6 @@ main :: Effect Unit
 main =
   runTest do
     runChapterExamples
-    {-  Move this block comment starting point to enable more tests
     suite "Exercise Group - Show Me" do
       test "Exercise - Show Point" do
         Assert.equal "(1.0, 2.0)"
@@ -48,6 +47,7 @@ main =
         test "multiply" do
           Assert.equal (cpx (-5.0) 10.0)
             $ mul (cpx 1.0 2.0) (cpx 3.0 4.0)
+    {-  Move this block comment starting point to enable more tests
       suite "Exercise - Ring Complex" do
         test "subtract" do
           Assert.equal (cpx 2.0 3.0)
