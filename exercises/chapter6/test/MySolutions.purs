@@ -1,6 +1,8 @@
 module Test.MySolutions where
 
 import Prelude
+import Data.Generic.Rep (class Generic)
+import Data.Generic.Rep.Show (genericShow)
 import Data.Newtype (class Newtype, over, over2, unwrap, wrap)
 
 -- Note to reader: Add your solutions to this file
@@ -44,21 +46,15 @@ instance semiringComplex :: Semiring Complex where
           { real: r1 * r2 - i1 * i2, imaginary: r1 * i2 + r2 * i1 }
       )
 
-newtype Foo
-  = MakeFoo Int
+derive newtype instance ringComplex :: Ring Complex
 
-derive instance newtypeFoo :: Newtype Foo _
+data Shape
+  = Circle Point Number
+  | Rectangle Point Number Number
+  | Line Point Point
+  | Text Point String
 
-derive newtype instance showFoo :: Show Foo
+derive instance genericShape :: Generic Shape _
 
-unFoo :: Foo -> Int
-unFoo = unwrap
-
-incFoo :: Foo -> Foo
-incFoo x = over wrap ((+) 1) x
-
-addFoo :: Foo -> Foo -> Foo
-addFoo x y = over2 wrap (+) x y
-
-addComplex :: Complex -> Complex -> Complex
-addComplex x y = over2 wrap (\({ real: r1, imaginary: i1 }) ({ real: r2, imaginary: i2 }) -> { real: r1 + r2, imaginary: i1 + i2 }) x y
+instance showShape :: Show Shape where
+  show = genericShow
