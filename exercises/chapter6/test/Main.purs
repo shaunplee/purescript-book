@@ -151,7 +151,6 @@ main =
           Assert.equal "123"
             $ foldMap (\x -> show x)
             $ OneMore 1 (2 : 3 : Nil)
-    {-  Move this block comment starting point to enable more tests
     suite "Exercise Group - More or less than one Type argument" do
       test "Exercise - unsafeMaximum" do
         Assert.equal 42
@@ -227,8 +226,8 @@ main =
           Assert.equal (act m1 (act m2 a))
             $ act (m1 <> m2) a
         test "Multiply Self append concrete" do
-          Assert.equal 72
-            $ act (act (m1 <> m2) a) 2
+          Assert.equal (Self $ Self $ Multiply 72)
+            $ act (act (m1 <> m2) a) (Self $ Self $ Multiply 2)
     suite "Exercise Group - Hashes" do
       suite "Exercise - arrayHasDuplicates" do
         test "No dupe" do
@@ -250,6 +249,7 @@ main =
             $ Assert.equal (hash $ Hour 1)
             $ hash
             $ Hour 14
+    {-  Move this block comment starting point to enable more tests
 
 -}
 runChapterExamples :: TestSuite
