@@ -39,11 +39,11 @@ findEntry firstName lastName = head <<< filter filterEntry
   filterEntry entry = entry.firstName == firstName && entry.lastName == lastName
 
 findEntryByStreet :: String -> AddressBook -> Maybe Entry
-findEntryByStreet street = head <<< filter filterEntry
-  where
-  filterEntry :: Entry -> Boolean
-  filterEntry entry = entry.address.street == street
+findEntryByStreet street = head <<< filter ((==) street <<< _.address.street)
 
+-- where
+-- filterEntry :: Entry -> Boolean
+-- filterEntry entry = entry.address.street == street
 isInBook :: String -> String -> AddressBook -> Boolean
 isInBook firstName lastName ab = maybe false (const true) (findEntry firstName lastName ab)
 
