@@ -64,7 +64,6 @@ main =
         test "text" do
           Assert.equal "(Text (1.0, 2.0) \"Hello\")"
             $ show $ Text (Point {x: 1.0, y: 2.0}) "Hello"
-    {-  Move this block comment starting point to enable more tests
       let
         withDups =
           [ Circle (Point {x: 1.0, y: 2.0}) 3.0
@@ -152,6 +151,7 @@ main =
           Assert.equal "123"
             $ foldMap (\x -> show x)
             $ OneMore 1 (2 : 3 : Nil)
+    {-  Move this block comment starting point to enable more tests
     suite "Exercise Group - More or less than one Type argument" do
       test "Exercise - unsafeMaximum" do
         Assert.equal 42
