@@ -547,7 +547,19 @@ Note that, just like for top-level declarations, it was not necessary to specify
 
 ## Infix Function Application
 
-In the code for `findEntry` above, we used a different form of function application: the `head` function was applied to the expression `filter filterEntry book` by using the infix `$` symbol.
+Most of the functions discussed so far used _prefix_ function application, where the function name was put _before_ the arguments. For example, when using the `findEntry` function to search an `AddressBook`, one might write:
+
+```text
+> findEntry "John" "Smith" addressBook
+```
+
+However, this chapter has also included examples of _infix_ functions, such as  the `==` function in the definition of `filterEntry`, where the function is put _between_ the arguments. These infix operators are actually defined in the PureScript source as infix aliases for their underlying implementations. For example, `==` is defined as an alias for the prefix `eq` function with the line:
+
+```haskell
+infix 4 eq as ==
+```
+
+Likewise, in the code for `findEntry` above, we used a different form of function application: the `head` function was applied to the expression `filter filterEntry book` by using the infix `$` symbol.
 
 This is equivalent to the usual application `head (filter filterEntry book)`
 
@@ -560,7 +572,7 @@ apply f x = f x
 infixr 0 apply as $
 ```
 
-So `apply` takes a function and a value and applies the function to the value. The `infixr` keyword is used to define `($)` as an alias for `apply`.
+So `apply` takes a function and a value and applies the function to the value. The `infixr` keyword is used to define `$` as an alias for `apply`.
 
 But why would we want to use `$` instead of regular function application? The reason is that `$` is a right-associative, low precedence operator. This means that `$` allows us to remove sets of parentheses for deeply-nested applications.
 
@@ -574,6 +586,35 @@ becomes (arguably) easier to read when expressed using `$`:
 
 ```haskell
 street $ address $ boss employee
+There are situations where putting a prefix function in an infix position as an operator leads to more readable code. One example is the `mod` function:
+```text
+> mod 8 3
+2
+```
+This is fine, but doesn't line up with common usage. Wrapping a prefix function in backticks (\`) lets you use a prefix function in infix position as an operator, e.g.,
+```text
+> 8 `mod` 3
+2
+```
+Likewise, wrapping an operator in parentheses lets you use it as a function in prefix position:
+```text
+> 8 + 3
+11
+
+> (+) 8 3
+11
+```
+This allows for compact definitions of curried (or partially applied) functions based on infix operator functions, such as the `add2` function below:
+```text
+> add2 = (+) 2
+> add2 4
+6
+```
+Alternatively, operators can be partially applied by surrounding them with parentheses and using `_` as an operand:
+```text
+> add3 = (3 + _)
+> add3 2
+5
 ```
 
 ## Function Composition
