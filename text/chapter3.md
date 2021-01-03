@@ -604,7 +604,7 @@ apply f x = f x
 infixr 0 apply as $
 ```
 
-So `apply` takes a function and a value and applies the function to the value. The `infixr` keyword is used to define `$` as an alias for `apply`.
+So `apply` takes a function and a value and applies the function to the value. The `infixr` keyword is used to define `($)` as an alias for `apply`.
 
 But why would we want to use `$` instead of regular function application? The reason is that `$` is a right-associative, low precedence operator. This means that `$` allows us to remove sets of parentheses for deeply-nested applications.
 
