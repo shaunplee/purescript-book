@@ -579,16 +579,64 @@ Note that, just like for top-level declarations, it was not necessary to specify
 
 ## Infix Function Application
 
-Most of the functions discussed so far used _prefix_ function application, where the function name was put _before_ the arguments. For example, when using the `findEntry` function to search an `AddressBook`, one might write:
+Most of the functions discussed so far used _prefix_ function application, where the function name was put _before_ the arguments. For example, when using the `insertEntry` function to add an `Entry` (`john`) to an empty `AddressBook`, we might write:
 
-```text
-> findEntry "John" "Smith" addressBook
+```haskell
+> book1 = insertEntry john emptyBook
 ```
 
-However, this chapter has also included examples of _infix_ functions, such as  the `==` function in the definition of `filterEntry`, where the function is put _between_ the arguments. These infix operators are actually defined in the PureScript source as infix aliases for their underlying implementations. For example, `==` is defined as an alias for the prefix `eq` function with the line:
+However, this chapter has also included examples of _infix_ [binary operators](https://github.com/purescript/documentation/blob/master/language/Syntax.md#binary-operators), such as  the `==` operator in the definition of `filterEntry`, where the operator is put _between_ the two arguments. These infix operators are actually defined in the PureScript source as infix aliases for their underlying _prefix_ implementations. For example, `==` is defined as an infix alias for the prefix `eq` function with the line:
 
 ```haskell
 infix 4 eq as ==
+```
+
+and therefore `entry.firstName == firstName` in `filterEntry` could be replaced with the `eq entry.firstName firstName`.
+
+There are situations where putting a prefix function in an infix position as an operator leads to more readable code. One example is the `mod` function:
+
+```text
+> mod 8 3
+2
+```
+
+This is fine, but doesn't line up with common usage (in conversation, one might say "eight mod three"). Wrapping a prefix function in backticks (\`) lets you use that it in infix position as an operator, e.g.,
+
+```text
+> 8 `mod` 3
+2
+```
+
+In the same way, wrapping `insertEntry` in backticks turns it into an infix operator, such that `book1` and `book2` below are equivalent:
+
+```haskell
+book1 = insertEntry john emptyBook
+book2 = john `insertEntry` emptyBook
+```
+
+We can make an `AddressBook` with multiple entries by using multiple applications of `insertEntry` as a prefix function (`book3`) or as an infix operator (`book4`) as shown below:
+
+```haskell
+book3 = insertEntry john (insertEntry peggy (insertEntry ned emptyBook))
+book4 = john `insertEntry` (peggy `insertEntry` (ned `insertEntry` emptyBook))
+```
+
+We can also define an operator alias/synonym for `insertEntry.` We'll arbitrarily choose `++` for this operator, give it a [precedence](https://github.com/purescript/documentation/blob/master/language/Syntax.md#precedence) of `5`, and make it right [associative](https://github.com/purescript/documentation/blob/master/language/Syntax.md#associativity) using `infixr`:
+
+```haskell
+infixr 5 insertEntry as ++
+```
+
+This new operator lets us rewrite the above `book4` example as:
+
+```haskell
+book6 = john ++ (peggy ++ (ned ++ emptyBook))
+```
+
+and the right associativity of our new `++` operator lets us get rid of the parentheses without changing the meaning:
+
+```haskell
+book6 = john ++ peggy ++ ned ++ emptyBook
 ```
 
 Likewise, in the code for `findEntry` above, we used a different form of function application: the `head` function was applied to the expression `filter filterEntry book` by using the infix `$` symbol.
@@ -606,40 +654,22 @@ infixr 0 apply as $
 
 So `apply` takes a function and a value and applies the function to the value. The `infixr` keyword is used to define `($)` as an alias for `apply`.
 
-But why would we want to use `$` instead of regular function application? The reason is that `$` is a right-associative, low precedence operator. This means that `$` allows us to remove sets of parentheses for deeply-nested applications.
+But why would we want to use `$` instead of regular function application? The reason is that `$` is a right-associative (`infixr`), low precedence (`0`) operator. This means that `$` allows us to remove sets of parentheses for deeply-nested applications.
 
-For example, the following nested function application, which finds the street in the address of an employee's boss:
+For example, the above nested function application to create an `AddressBook` with three entries:
 
 ```haskell
-_.street (_.address (_.boss employee))
+book3 = insertEntry john (insertEntry peggy (insertEntry ned emptyBook))
 ```
 
 becomes (arguably) easier to read when expressed using `$`:
 
 ```haskell
-_.street $ _.address $ _.boss employee
+book6 = insertEntry john $ insertEntry peggy $ insertEntry ned emptyBook
 ```
 
-Note that neither of the above examples is idiomatic PureScript. Real-world code is more likely to express this as:
-```haskell
-(boss employee).address.street
-```
-or
-```haskell
-_.boss.address.street employee
-```
+Wrapping an infix operator in parentheses lets you use it as a prefix function:
 
-There are situations where putting a prefix function in an infix position as an operator leads to more readable code. One example is the `mod` function:
-```text
-> mod 8 3
-2
-```
-This is fine, but doesn't line up with common usage. Wrapping a prefix function in backticks (\`) lets you use a prefix function in infix position as an operator, e.g.,
-```text
-> 8 `mod` 3
-2
-```
-Likewise, wrapping an operator in parentheses lets you use it as a function in prefix position:
 ```text
 > 8 + 3
 11
@@ -647,17 +677,23 @@ Likewise, wrapping an operator in parentheses lets you use it as a function in p
 > (+) 8 3
 11
 ```
-This allows for compact definitions of curried (or partially applied) functions based on infix operator functions, such as the `add2` function below:
-```text
-> add2 = (+) 2
-> add2 4
-6
-```
+
 Alternatively, operators can be partially applied by surrounding them with parentheses and using `_` as an operand in an [operator section](https://github.com/purescript/documentation/blob/master/language/Syntax.md#operator-sections):
+
 ```text
 > add3 = (3 + _)
 > add3 2
 5
+```
+
+To summarize, the following are equivalent definitions of a function  that adds `5` to its argument:
+
+```haskell
+add5 x = 5 + x
+add5 x = add 5 x
+add5 x = (+) 5 x
+add5 x = 5 `add` x
+add5   = add 5
 ```
 
 ## Function Composition
