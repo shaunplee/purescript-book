@@ -653,7 +653,7 @@ This allows for compact definitions of curried (or partially applied) functions 
 > add2 4
 6
 ```
-Alternatively, operators can be partially applied by surrounding them with parentheses and using `_` as an operand:
+Alternatively, operators can be partially applied by surrounding them with parentheses and using `_` as an operand in an [operator section](https://github.com/purescript/documentation/blob/master/language/Syntax.md#operator-sections):
 ```text
 > add3 = (3 + _)
 > add3 2
