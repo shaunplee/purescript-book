@@ -487,7 +487,7 @@ One common pattern is to use a function to access an individual fields (or "prop
 \entry -> entry.address
 ```
 
-PureScript provides an equivalent shorthand, where an underscore is followed by a field name, so the inline function above is equivalent to:
+PureScript provides an equivalent [_property accessor_](https://github.com/purescript/documentation/blob/master/language/Syntax.md#property-accessors) shorthand, where an underscore is followed by a field name, so the inline function above is equivalent to:
 
 ```haskell
 _.address
