@@ -12,6 +12,10 @@ findEntryByStreet streetName = filter filterEntry >>> head
   filterEntry :: Entry -> Boolean
   filterEntry e = e.address.street == streetName
 
+-- Example alternative implementation using property accessor and composition
+findEntryByStreet' :: String -> AddressBook -> Maybe Entry
+findEntryByStreet' streetName = filter (_.address.street >>> ((==) streetName)) >>> head
+
 isInBook :: String -> String -> AddressBook -> Boolean
 isInBook firstName lastName book = not null $ filter filterEntry book
   where

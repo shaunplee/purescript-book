@@ -479,6 +479,38 @@ This process is called _eta conversion_, and can be used (along with some other 
 
 In the case of `insertEntry`, _eta conversion_ has resulted in a very clear definition of our function - "`insertEntry` is just cons on lists". However, it is arguable whether point-free form is better in general.
 
+## Property Accessors
+
+One common pattern is to use a function to access an individual fields (or "properties") of a record. An inline function to extract an `Address` from an `Entry` could be written as:
+
+```haskell
+\entry -> entry.address
+```
+
+PureScript provides an equivalent shorthand, where an underscore is followed by a field name, so the inline function above is equivalent to:
+
+```haskell
+_.address
+```
+
+This works with any number of levels or properties, so a function to extract the city associated with an `Entry` could be written as:
+
+```haskell
+_.address.city
+```
+
+For example:
+
+```text
+> address = { street: "123 Fake St.", city: "Faketown", state: "CA" }
+> entry = { firstName: "John", lastName: "Smith", address: address }
+> _.lastName entry
+"Smith"
+
+> _.address.city entry
+"Faketown"
+```
+
 ## Querying the Address Book
 
 The last function we need to implement for our minimal address book application will look up a person by name and return the correct `Entry`. This will be a nice application of building programs by composing small functions - a key idea from functional programming.
@@ -563,7 +595,7 @@ Likewise, in the code for `findEntry` above, we used a different form of functio
 
 This is equivalent to the usual application `head (filter filterEntry book)`
 
-`($)` is just an alias for a regular function called `apply`, which is defined in the Prelude. It is defined as follows:
+`$` is just an alias for a regular function called `apply`, which is defined in the Prelude. It is defined as follows:
 
 ```haskell
 apply :: forall a b. (a -> b) -> a -> b
@@ -579,13 +611,24 @@ But why would we want to use `$` instead of regular function application? The re
 For example, the following nested function application, which finds the street in the address of an employee's boss:
 
 ```haskell
-street (address (boss employee))
+_.street (_.address (_.boss employee))
 ```
 
 becomes (arguably) easier to read when expressed using `$`:
 
 ```haskell
-street $ address $ boss employee
+_.street $ _.address $ _.boss employee
+```
+
+Note that neither of the above examples is idiomatic PureScript. Real-world code is more likely to express this as:
+```haskell
+(boss employee).address.street
+```
+or
+```haskell
+_.boss.address.street employee
+```
+
 There are situations where putting a prefix function in an infix position as an operator leads to more readable code. One example is the `mod` function:
 ```text
 > mod 8 3
@@ -653,6 +696,7 @@ I will let you make your own decision which definition is easier to understand, 
 
  1. (Easy) Test your understanding of the `findEntry` function by writing down the types of each of its major subexpressions. For example, the type of the `head` function as used is specialized to `AddressBook -> Maybe Entry`. _Note_: There is no test for this exercise.
  1. (Medium) Write a function `findEntryByStreet :: String -> AddressBook -> Maybe Entry` which looks up an `Entry` given a street address. _Hint_ reusing the existing code in `findEntry`. Test your function in PSCi and by running `spago test`.
+ 1. (Medium) Rewrite `findEntryByStreet` to replace `filterEntry` with the composition (using `<<<` or `>>>`) of: a property accessor (using the `_.` notation); and a function that tests whether its given string argument is equal to the given street address.
  1. (Medium) Write a function `isInBook` which tests whether a name appears in a `AddressBook`, returning a Boolean value. _Hint_: Use PSCi to find the type of the `Data.List.null` function, which tests whether a list is empty or not.
  1. (Difficult) Write a function `removeDuplicates` which removes "duplicate" address book entries. We'll consider entries duplicated if they share the same first and last names, while ignoring `address` fields. _Hint_: Use PSCi to find the type of the `Data.List.nubBy` function, which removes duplicate elements from a list based on an equality predicate. Note that the first element in each set of duplicates (closest to list head) is the one that is kept.
 
