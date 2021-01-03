@@ -595,7 +595,7 @@ Likewise, in the code for `findEntry` above, we used a different form of functio
 
 This is equivalent to the usual application `head (filter filterEntry book)`
 
-`$` is just an alias for a regular function called `apply`, which is defined in the Prelude. It is defined as follows:
+`($)` is just an alias for a regular function called `apply`, which is defined in the Prelude. It is defined as follows:
 
 ```haskell
 apply :: forall a b. (a -> b) -> a -> b
