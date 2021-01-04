@@ -665,7 +665,7 @@ findEntry firstName lastName book = head $ filter filterEntry book
 ```
 We'll see an even more elegant way to rewrite this line with "function composition" in the next section.
 
-If you'd like to use a concise infix operator alias as a prefix function, you can surround it in parenthesis:
+If you'd like to use a concise infix operator alias as a prefix function, you can surround it in parentheses:
 
 ```text
 > 8 + 3
