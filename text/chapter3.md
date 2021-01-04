@@ -481,13 +481,13 @@ In the case of `insertEntry`, _eta conversion_ has resulted in a very clear defi
 
 ## Property Accessors
 
-One common pattern is to use a function to access an individual fields (or "properties") of a record. An inline function to extract an `Address` from an `Entry` could be written as:
+One common pattern is to use a function to access individual fields (or "properties") of a record. An inline function to extract an `Address` from an `Entry` could be written as:
 
 ```haskell
 \entry -> entry.address
 ```
 
-PureScript provides an equivalent [_property accessor_](https://github.com/purescript/documentation/blob/master/language/Syntax.md#property-accessors) shorthand, where an underscore is followed by a field name, so the inline function above is equivalent to:
+PureScript also allows [_property accessor_](https://github.com/purescript/documentation/blob/master/language/Syntax.md#property-accessors) shorthand, where an underscore acts as the anonymous fuction argument, so the inline function above is equivalent to:
 
 ```haskell
 _.address
@@ -561,7 +561,7 @@ This type signature says that `findEntry` takes two strings, the first and last 
 And here is the definition of `findEntry`:
 
 ```haskell
-findEntry firstName lastName book = head $ filter filterEntry book
+findEntry firstName lastName book = head (filter filterEntry book)
   where
     filterEntry :: Entry -> Boolean
     filterEntry entry = entry.firstName == firstName && entry.lastName == lastName
@@ -591,7 +591,7 @@ However, this chapter has also included examples of _infix_ [binary operators](h
 infix 4 eq as ==
 ```
 
-and therefore `entry.firstName == firstName` in `filterEntry` could be replaced with the `eq entry.firstName firstName`.
+and therefore `entry.firstName == firstName` in `filterEntry` could be replaced with the `eq entry.firstName firstName`. We'll cover a few more examples of defining infix operators later in this section.
 
 There are situations where putting a prefix function in an infix position as an operator leads to more readable code. One example is the `mod` function:
 
@@ -621,7 +621,7 @@ book3 = insertEntry john (insertEntry peggy (insertEntry ned emptyBook))
 book4 = john `insertEntry` (peggy `insertEntry` (ned `insertEntry` emptyBook))
 ```
 
-We can also define an operator alias/synonym for `insertEntry.` We'll arbitrarily choose `++` for this operator, give it a [precedence](https://github.com/purescript/documentation/blob/master/language/Syntax.md#precedence) of `5`, and make it right [associative](https://github.com/purescript/documentation/blob/master/language/Syntax.md#associativity) using `infixr`:
+We can also define an infix operator alias (or synonym) for `insertEntry.` We'll arbitrarily choose `++` for this operator, give it a [precedence](https://github.com/purescript/documentation/blob/master/language/Syntax.md#precedence) of `5`, and make it right [associative](https://github.com/purescript/documentation/blob/master/language/Syntax.md#associativity) using `infixr`:
 
 ```haskell
 infixr 5 insertEntry as ++
@@ -630,7 +630,7 @@ infixr 5 insertEntry as ++
 This new operator lets us rewrite the above `book4` example as:
 
 ```haskell
-book6 = john ++ (peggy ++ (ned ++ emptyBook))
+book5 = john ++ (peggy ++ (ned ++ emptyBook))
 ```
 
 and the right associativity of our new `++` operator lets us get rid of the parentheses without changing the meaning:
@@ -639,11 +639,16 @@ and the right associativity of our new `++` operator lets us get rid of the pare
 book6 = john ++ peggy ++ ned ++ emptyBook
 ```
 
-Likewise, in the code for `findEntry` above, we used a different form of function application: the `head` function was applied to the expression `filter filterEntry book` by using the infix `$` symbol.
+Another common technique for eliminating parens is to use `apply`'s infix operator `$`, along with your standard prefix functions.
 
-This is equivalent to the usual application `head (filter filterEntry book)`
+For example, the earlier `book3` example could be rewritten as:
+```haskell
+book7 = insertEntry john $ insertEntry peggy $ insertEntry ned emptyBook
+```
 
-`($)` is just an alias for a regular function called `apply`, which is defined in the Prelude. It is defined as follows:
+Substituting `$` for parens is usually easier to type and (arguably) easier to read. A mnemonic to remember the meaning of this symbol is to think of the dollar sign as being drawn from two parens that are also being crossed-out, suggesting the parens are now unnecessary.
+
+Note that `$` isn't special syntax that's hardcoded into the language. It's simply the infix operator for a regular function called `apply`, which is defined in the Prelude as follows:
 
 ```haskell
 apply :: forall a b. (a -> b) -> a -> b
@@ -652,23 +657,15 @@ apply f x = f x
 infixr 0 apply as $
 ```
 
-So `apply` takes a function and a value and applies the function to the value. The `infixr` keyword is used to define `($)` as an alias for `apply`.
+The `apply` function takes another function (of type `(a -> b)`) as its first argument and a value (of type `a`) as its second argument, then calls that function with that value. If it seems like this function doesn't contribute anything meaningful, you are absolutely correct! Your program is logically identical without it (see [referential transparency](https://en.wikipedia.org/wiki/Referential_transparency)). The syntactic utility of this function comes from the special properties assigned to its infix operator. `$` is a right-associative (`infixr`), low precedence (`0`) operator, which lets us remove sets of parentheses for deeply-nested applications.
 
-But why would we want to use `$` instead of regular function application? The reason is that `$` is a right-associative (`infixr`), low precedence (`0`) operator. This means that `$` allows us to remove sets of parentheses for deeply-nested applications.
-
-For example, the above nested function application to create an `AddressBook` with three entries:
-
+Another parens-busting opportunity for the `$` operator is in our earlier `findEntry` function:
 ```haskell
-book3 = insertEntry john (insertEntry peggy (insertEntry ned emptyBook))
+findEntry firstName lastName book = head $ filter filterEntry book
 ```
+We'll see an even more elegant way to rewrite this line with "function composition" in the next section.
 
-becomes (arguably) easier to read when expressed using `$`:
-
-```haskell
-book6 = insertEntry john $ insertEntry peggy $ insertEntry ned emptyBook
-```
-
-Wrapping an infix operator in parentheses lets you use it as a prefix function:
+If you'd like to use a concise infix operator alias as a prefix function, you can surround it in parentheses:
 
 ```text
 > 8 + 3
@@ -678,7 +675,7 @@ Wrapping an infix operator in parentheses lets you use it as a prefix function:
 11
 ```
 
-Alternatively, operators can be partially applied by surrounding them with parentheses and using `_` as an operand in an [operator section](https://github.com/purescript/documentation/blob/master/language/Syntax.md#operator-sections):
+Alternatively, operators can be partially applied by surrounding the expression with parentheses and using `_` as an operand in an [operator section](https://github.com/purescript/documentation/blob/master/language/Syntax.md#operator-sections). You can think of this as a more convenient way to create simple anonymous functions (although in the below example, we're then binding that anonymous function to a name, so it's not so anonymous anymore):
 
 ```text
 > add3 = (3 + _)
@@ -686,7 +683,7 @@ Alternatively, operators can be partially applied by surrounding them with paren
 5
 ```
 
-To summarize, the following are equivalent definitions of a function  that adds `5` to its argument:
+To summarize, the following are equivalent definitions of a function that adds `5` to its argument:
 
 ```haskell
 add5 x = 5 + x
@@ -694,6 +691,9 @@ add5 x = add 5 x
 add5 x = (+) 5 x
 add5 x = 5 `add` x
 add5   = add 5
+add5   = \x -> 5 + x
+add5   = (5 + _)
+add5 x = 5 `(+)` x  -- Yo Dawg, I herd you like infix, so we put infix in your infix!
 ```
 
 ## Function Composition
