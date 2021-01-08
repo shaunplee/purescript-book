@@ -2,7 +2,6 @@ module Test.Main where
 
 import Prelude
 import Test.MySolutions
-
 import Data.Foldable (foldMap, foldl, foldr)
 import Data.Hashable (hash)
 import Data.List (List(..), (:))
@@ -20,9 +19,10 @@ main =
       test "Exercise - Show Point" do
         Assert.equal "(1.0, 2.0)"
           $ show
-          $ Point {x: 1.0, y: 2.0}
+          $ Point { x: 1.0, y: 2.0 }
     suite "Exercise Group - Common Type Classes" do
-      let cpx real imaginary = Complex {real, imaginary}
+      let
+        cpx real imaginary = Complex { real, imaginary }
       suite "Exercise - Show Complex" do
         test "Show" do
           Assert.equal "1.0+2.0i"
@@ -39,7 +39,7 @@ main =
         test "not equal" do
           Assert.expectFailure "should not be equal"
             $ Assert.equal (cpx 5.0 2.0)
-              $ cpx 1.0 2.0
+            $ cpx 1.0 2.0
       suite "Exercise - Semiring Complex" do
         test "add" do
           Assert.equal (cpx 4.0 6.0)
@@ -54,27 +54,32 @@ main =
       suite "Exercise - Show Shape" do
         test "circle" do
           Assert.equal "(Circle (1.0, 2.0) 3.0)"
-            $ show $ Circle (Point {x: 1.0, y: 2.0}) 3.0
+            $ show
+            $ Circle (Point { x: 1.0, y: 2.0 }) 3.0
         test "rectangle" do
           Assert.equal "(Rectangle (1.0, 2.0) 3.0 4.0)"
-            $ show $ Rectangle (Point {x: 1.0, y: 2.0}) 3.0 4.0
+            $ show
+            $ Rectangle (Point { x: 1.0, y: 2.0 }) 3.0 4.0
         test "line" do
           Assert.equal "(Line (1.0, 2.0) (3.0, 4.0))"
-            $ show $ Line (Point {x: 1.0, y: 2.0}) (Point {x: 3.0, y: 4.0})
+            $ show
+            $ Line (Point { x: 1.0, y: 2.0 }) (Point { x: 3.0, y: 4.0 })
         test "text" do
           Assert.equal "(Text (1.0, 2.0) \"Hello\")"
-            $ show $ Text (Point {x: 1.0, y: 2.0}) "Hello"
+            $ show
+            $ Text (Point { x: 1.0, y: 2.0 }) "Hello"
       let
         withDups =
-          [ Circle (Point {x: 1.0, y: 2.0}) 3.0
-          , Circle (Point {x: 3.0, y: 2.0}) 3.0
-          , Circle (Point {x: 1.0, y: 2.0}) 3.0
-          , Circle (Point {x: 2.0, y: 2.0}) 3.0
+          [ Circle (Point { x: 1.0, y: 2.0 }) 3.0
+          , Circle (Point { x: 3.0, y: 2.0 }) 3.0
+          , Circle (Point { x: 1.0, y: 2.0 }) 3.0
+          , Circle (Point { x: 2.0, y: 2.0 }) 3.0
           ]
+
         noDups =
-          [ Circle (Point {x: 1.0, y: 2.0}) 3.0
-          , Circle (Point {x: 3.0, y: 2.0}) 3.0
-          , Circle (Point {x: 2.0, y: 2.0}) 3.0
+          [ Circle (Point { x: 1.0, y: 2.0 }) 3.0
+          , Circle (Point { x: 3.0, y: 2.0 }) 3.0
+          , Circle (Point { x: 2.0, y: 2.0 }) 3.0
           ]
       test "Exercise - dedupShapes" do
         Assert.equal noDups
@@ -171,9 +176,9 @@ main =
           test "Multiply Int append" do
             Assert.equal (act m1 (act m2 a))
               $ act (m1 <> m2) a
-          test "Multiply Int append concrete" do
-            Assert.equal 60
-              $ act (m1 <> m2) a
+          test "Multiply Int concrete" do
+            Assert.equal 15
+              $ act m1 a
         -- Multiply String is the actual exercise question
         suite "Multiply String" do
           let
@@ -184,9 +189,9 @@ main =
           test "Multiply String append" do
             Assert.equal (act m1 (act m2 a))
               $ act (m1 <> m2) a
-          test "Multiply String append concrete" do
-            Assert.equal "foofoofoofoofoofoofoofoofoofoofoofoo"
-              $ act (m1 <> m2) a
+          test "Multiply String concrete" do
+            Assert.equal "foofoofoo"
+              $ act m1 a
       suite "Exercise - Action Class - actionArray instance" do
         suite "Multiply Array Int" do
           let
@@ -197,9 +202,9 @@ main =
           test "Multiply Array Int append" do
             Assert.equal (act m1 (act m2 a))
               $ act (m1 <> m2) a
-          test "Multiply Array Int append concrete" do
-            Assert.equal [ 12, 24, 36 ]
-              $ act (m1 <> m2) a
+          test "Multiply Array Int concrete" do
+            Assert.equal [ 3, 6, 9 ]
+              $ act m1 a
         suite "Multiply Array String" do
           let
             a = [ "foo", "bar", "baz" ]
@@ -209,13 +214,13 @@ main =
           test "Multiply Array String append" do
             Assert.equal (act m1 (act m2 a))
               $ act (m1 <> m2) a
-          test "Multiply Array String append concrete" do
+          test "Multiply Array String concrete" do
             Assert.equal
-              [ "foofoofoofoofoofoofoofoofoofoofoofoo"
-              , "barbarbarbarbarbarbarbarbarbarbarbar"
-              , "bazbazbazbazbazbazbazbazbazbazbazbaz"
+              [ "foofoofoo"
+              , "barbarbar"
+              , "bazbazbaz"
               ]
-              $ act (m1 <> m2) a
+              $ act m1 a
       suite "Exercise - Action Class - actionSelf instance" do
         let
           a = Self m1
@@ -225,9 +230,9 @@ main =
         test "Multiply Self append" do
           Assert.equal (act m1 (act m2 a))
             $ act (m1 <> m2) a
-        test "Multiply Self append concrete" do
-          Assert.equal (Self $ Self $ Multiply 72)
-            $ act (act (m1 <> m2) a) (Self $ Self $ Multiply 2)
+        test "Multiply Self concrete" do
+          Assert.equal (Self (Multiply 12))
+            $ act m2 a
     suite "Exercise Group - Hashes" do
       suite "Exercise - arrayHasDuplicates" do
         test "No dupe" do
@@ -249,7 +254,8 @@ main =
             $ Assert.equal (hash $ Hour 1)
             $ hash
             $ Hour 14
-    {-  Move this block comment starting point to enable more tests
+
+{-  Move this block comment starting point to enable more tests
 
 -}
 runChapterExamples :: TestSuite
