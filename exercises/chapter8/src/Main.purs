@@ -1,7 +1,6 @@
 module Main where
 
 import Prelude
-
 import Data.AddressBook (PhoneNumber, examplePerson)
 import Data.AddressBook.Validation (Errors, validatePerson')
 import Data.Array (mapWithIndex, updateAt)
@@ -26,6 +25,7 @@ import Web.HTML.Window (document)
 -- https://gitlab.com/joneshf/purty/issues/77
 renderValidationErrors :: Errors -> Array R.JSX
 renderValidationErrors [] = []
+
 renderValidationErrors xs =
   let
     renderError :: String -> R.JSX
@@ -59,7 +59,8 @@ formField name placeholder value setValue =
                         let
                           handleValue :: Maybe String -> Effect Unit
                           handleValue (Just v) = setValue v
-                          handleValue Nothing  = pure unit
+
+                          handleValue Nothing = pure unit
                         in
                           handler targetValue handleValue
                     }
@@ -78,7 +79,7 @@ mkAddressBookApp =
     Tuple person setPerson <- useState examplePerson
     let
       errors = case validatePerson' person of
-        Left  e -> e
+        Left e -> e
         Right _ -> []
 
       -- helper-function to return array unchanged instead of Nothing if index is out of bounds
