@@ -1,9 +1,9 @@
 module Main where
 
 import Prelude
-import Data.AddressBook (PhoneNumber, examplePerson)
-import Data.AddressBook.Validation (Errors, validatePerson')
-import Data.Array (mapWithIndex, updateAt)
+import Data.AddressBook (PhoneNumber, PhoneType(..), examplePerson)
+import Data.AddressBook.Validation (Errors, Field(..), ValidationError(..), validatePerson')
+import Data.Array (filter, mapWithIndex, updateAt)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Tuple (Tuple(..))
@@ -28,28 +28,33 @@ renderValidationErrors [] = []
 
 renderValidationErrors xs =
   let
-    renderError :: String -> R.JSX
-    renderError err = D.li_ [ D.text err ]
-  in
-    [ D.div
-        { className: "alert alert-danger row"
-        , children: [ D.ul_ (map renderError xs) ]
+    renderError :: ValidationError -> R.JSX
+    renderError (ValidationError err field) =
+      D.div
+        { className: "alert alert-danger"
+        , children: [ D.text err ]
         }
-    ]
+  in
+    map renderError xs
+
+fieldIs :: Field -> ValidationError -> Boolean
+fieldIs (PhoneField x) (ValidationError _ (PhoneField y)) = eq x y
+
+fieldIs f (ValidationError _ fn) = f == fn
 
 -- Helper function to render a single form field with an
 -- event handler to update
-formField :: String -> String -> String -> (String -> Effect Unit) -> R.JSX
-formField name placeholder value setValue =
+formField :: String -> String -> Array ValidationError -> String -> (String -> Effect Unit) -> R.JSX
+formField name placeholder errors value setValue =
   D.label
     { className: "form-group row"
     , children:
         [ D.div
-            { className: "col-sm col-form-label"
+            { className: "col-md col-form-label"
             , children: [ D.text name ]
             }
         , D.div
-            { className: "col-sm"
+            { className: "col-md"
             , children:
                 [ D.input
                     { className: "form-control"
@@ -65,6 +70,10 @@ formField name placeholder value setValue =
                           handler targetValue handleValue
                     }
                 ]
+            }
+        , D.div
+            { className: "col-md"
+            , children: renderValidationErrors errors
             }
         ]
     }
@@ -92,6 +101,7 @@ mkAddressBookApp =
         formField
           (show phone."type")
           "XXX-XXX-XXXX"
+          (filter (fieldIs (PhoneField phone."type")) errors)
           phone.number
           (\s -> setPerson _ { phones = updateAt' index phone { number = s } person.phones })
 
@@ -102,29 +112,28 @@ mkAddressBookApp =
       $ D.div
           { className: "container"
           , children:
-              renderValidationErrors errors
-                <> [ D.div
-                      { className: "row"
-                      , children:
-                          [ D.form_
-                              $ [ D.h3_ [ D.text "Basic Information" ]
-                                , formField "First Name" "First Name" person.firstName \s ->
-                                    setPerson _ { firstName = s }
-                                , formField "Last Name" "Last Name" person.lastName \s ->
-                                    setPerson _ { lastName = s }
-                                , D.h3_ [ D.text "Address" ]
-                                , formField "Street" "Street" person.homeAddress.street \s ->
-                                    setPerson _ { homeAddress { street = s } }
-                                , formField "City" "City" person.homeAddress.city \s ->
-                                    setPerson _ { homeAddress { city = s } }
-                                , formField "State" "State" person.homeAddress.state \s ->
-                                    setPerson _ { homeAddress { state = s } }
-                                , D.h3_ [ D.text "Contact Information" ]
-                                ]
-                              <> renderPhoneNumbers
-                          ]
-                      }
-                  ]
+              [ D.div
+                  { className: "row"
+                  , children:
+                      [ D.form_
+                          $ [ D.h3_ [ D.text "Basic Information" ]
+                            , formField "First Name" "First Name" (filter (fieldIs FirstNameField) errors) person.firstName \s ->
+                                setPerson _ { firstName = s }
+                            , formField "Last Name" "Last Name" (filter (fieldIs LastNameField) errors) person.lastName \s ->
+                                setPerson _ { lastName = s }
+                            , D.h3_ [ D.text "Address" ]
+                            , formField "Street" "Street" (filter (fieldIs StreetField) errors) person.homeAddress.street \s ->
+                                setPerson _ { homeAddress { street = s } }
+                            , formField "City" "City" (filter (fieldIs CityField) errors) person.homeAddress.city \s ->
+                                setPerson _ { homeAddress { city = s } }
+                            , formField "State" "State" (filter (fieldIs StateField) errors) person.homeAddress.state \s ->
+                                setPerson _ { homeAddress { state = s } }
+                            , D.h3_ [ D.text "Contact Information" ]
+                            ]
+                          <> renderPhoneNumbers
+                      ]
+                  }
+              ]
           }
 
 main :: Effect Unit
