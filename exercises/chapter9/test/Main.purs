@@ -2,7 +2,6 @@ module Test.Main where
 
 import Prelude
 import Test.MySolutions
-
 import Data.Array ((..))
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..))
@@ -33,15 +32,14 @@ outDir = Path.concat [ "test", "data-out" ]
 -- http-server (npm i -g http-server) and running it in the "/test/data"
 -- directory (http-server -p 42524)
 reqUrl :: String
-reqUrl =
-  -- Both http and https work for this API endpoint.
+reqUrl = -- Both http and https work for this API endpoint.
   "https://jsonplaceholder.typicode.com/todos/1"
-  -- If you want or need to use the http version (not the https), just
-  -- remove the 's' from `https://`:
-  --"http://jsonplaceholder.typicode.com/todos/1"
-  -- Use this url for the http-server solution:
-  --"http://localhost:42524/user.txt"
 
+-- If you want or need to use the http version (not the https), just
+-- remove the 's' from `https://`:
+--"http://jsonplaceholder.typicode.com/todos/1"
+-- Use this url for the http-server solution:
+--"http://localhost:42524/user.txt"
 main :: Effect Unit
 main =
   runTest do
@@ -50,7 +48,6 @@ main =
       files <- readdir outDir
       for_ files \f -> unlink $ Path.concat [ outDir, f ]
     runChapterExamples
-    {-  Move this block comment starting point to enable more tests
     test "concatenateFiles" do
       let
         inFoo = Path.concat [ inDir, "foo.txt" ]
@@ -134,6 +131,7 @@ main =
           expected = [ file ]
         actual <- recurseFiles file
         Assert.equal (Set.fromFoldable expected) $ Set.fromFoldable actual
+{-  Move this block comment starting point to enable more tests
 
 -}
 runChapterExamples :: TestSuite
