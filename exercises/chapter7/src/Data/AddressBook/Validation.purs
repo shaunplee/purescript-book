@@ -51,16 +51,6 @@ lengthIs field len value | length value /= len =
   invalid [ "Field '" <> field <> "' must have length " <> show len ]
 lengthIs _     _   value = pure value
 
-<<<<<<< HEAD
-phoneNumberRegex :: Either String Regex
-phoneNumberRegex = regex "^\\d{3}-\\d{3}-\\d{4}$" noFlags
-
-matches :: String -> Either String Regex -> String -> V Errors String
-matches _    (Right regex) value | test regex value 
-                                 = pure value
-matches _    (Left  error) _     = invalid [ error ]
-matches field _            _     = invalid [ "Field '" <> field <> "' did not match the required format" ]
-=======
 -- ANCHOR: phoneNumberRegex
 -- | We use `Data.String.Regex.Unsafe.unsafeRegex` here instead of `Data.String.Regex.regex`
 -- | in order to simplify the code.
@@ -94,7 +84,6 @@ matches _     regex value | test regex value
                           = pure value
 matches field _     _     = invalid [ "Field '" <> field <> "' did not match the required format" ]
 -- ANCHOR_END: matches
->>>>>>> origin/master
 
 validateAddress :: Address -> V Errors Address
 validateAddress a =

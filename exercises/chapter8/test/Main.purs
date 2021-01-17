@@ -75,10 +75,10 @@ main =
         suite "estimatePi" do
           test "1000 terms of Gregory Series"
             $ Assert.assert "Estimated value of pi not within threshold"
-            (abs (estimatePi 1000 - pi) < 0.002)
+                (abs (estimatePi 1000 - pi) < 0.002)
           test "1000000 terms of Gregory Series"
             $ Assert.assert "Estimated value of pi not within threshold"
-            (abs (estimatePi 1000000 - pi) < 0.000002)
+                (abs (estimatePi 1000000 - pi) < 0.000002)
         suite "fibonacci" do
           test "40th Fibonacci number"
             $ Assert.equal 165580141 (fibonacci 40)
@@ -86,7 +86,6 @@ main =
             $ Assert.equal 1836311903 (fibonacci 45)
 
 {-  Move this block comment starting point to enable more tests
-
 -}
 runChapterExamples :: TestSuite
 runChapterExamples =

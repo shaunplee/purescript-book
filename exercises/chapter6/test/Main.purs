@@ -66,31 +66,7 @@ main =
             $ Line (Point { x: 1.0, y: 2.0 }) (Point { x: 3.0, y: 4.0 })
         test "text" do
           Assert.equal "(Text (1.0, 2.0) \"Hello\")"
-<<<<<<< HEAD
-            $ show
-            $ Text (Point { x: 1.0, y: 2.0 }) "Hello"
-      let
-        withDups =
-          [ Circle (Point { x: 1.0, y: 2.0 }) 3.0
-          , Circle (Point { x: 3.0, y: 2.0 }) 3.0
-          , Circle (Point { x: 1.0, y: 2.0 }) 3.0
-          , Circle (Point { x: 2.0, y: 2.0 }) 3.0
-          ]
-
-        noDups =
-          [ Circle (Point { x: 1.0, y: 2.0 }) 3.0
-          , Circle (Point { x: 3.0, y: 2.0 }) 3.0
-          , Circle (Point { x: 2.0, y: 2.0 }) 3.0
-          ]
-      test "Exercise - dedupShapes" do
-        Assert.equal noDups
-          $ dedupShapes withDups
-      test "Exercise - dedupShapesFast" do
-        Assert.equal noDups
-          $ dedupShapesFast withDups
-=======
             $ show $ Text (Point {x: 1.0, y: 2.0}) "Hello"
->>>>>>> origin/master
     suite "Exercise Group - Constraints and Dependencies" do
       suite "Exercise - Eq for NonEmpty" do
         test "NonEmpty equals" do

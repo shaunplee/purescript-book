@@ -1,17 +1,9 @@
 module Data.AddressBook.Validation where
 
 import Prelude
-<<<<<<< HEAD
-import Data.AddressBook (Address, Person, PhoneNumber, PhoneType(..), address, person, phoneNumber)
-import Data.Either (Either(..))
-import Data.Generic.Rep (class Generic)
-import Data.Generic.Rep.Eq (genericEq)
-import Data.Generic.Rep.Show (genericShow)
-=======
 
 import Data.AddressBook (Address, Person, PhoneNumber, address, person, phoneNumber)
 import Data.Either (Either)
->>>>>>> origin/master
 import Data.String (length)
 import Data.String.Regex (Regex, test)
 import Data.String.Regex.Flags (noFlags)
@@ -60,20 +52,10 @@ lengthIs _ _ value = pure value
 phoneNumberRegex :: Regex
 phoneNumberRegex = unsafeRegex "^\\d{3}-\\d{3}-\\d{4}$" noFlags
 
-<<<<<<< HEAD
-matches :: Field -> Either String Regex -> String -> V Errors String
-matches _ (Right regex) value
-  | test regex value = pure value
-
-matches field (Left error) _ = invalid [ ValidationError error field ]
-
-matches field _ _ = invalid [ ValidationError "Field did not match the required format" field ]
-=======
 matches :: String -> Regex -> String -> V Errors String
-matches _     regex value | test regex value 
+matches _     regex value | test regex value
                           = pure value
 matches field _     _     = invalid [ "Field '" <> field <> "' did not match the required format" ]
->>>>>>> origin/master
 
 validateAddress :: Address -> V Errors Address
 validateAddress a =

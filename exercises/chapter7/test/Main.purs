@@ -97,17 +97,8 @@ main =
     suite "Exercise Group - Applicative Validation" do
       suite "Exercise - stateRegex" do
         let
-<<<<<<< HEAD
-          stateTest str exp =
-            test (show str) do
-              Assert.equal (Right exp)
-                $ R.test
-                <$> stateRegex
-                <*> Right str
-=======
           stateTest str exp = test str do
              Assert.equal exp $ R.test stateRegex str
->>>>>>> origin/master
         stateTest "CA" true
         stateTest "Ca" true
         stateTest "C" false
@@ -115,17 +106,8 @@ main =
         stateTest "C3" false
       suite "Exercise - nonEmptyRegex" do
         let
-<<<<<<< HEAD
-          nonEmptyTest str exp =
-            test (show str) do
-              Assert.equal (Right exp)
-                $ R.test
-                <$> nonEmptyRegex
-                <*> Right str
-=======
           nonEmptyTest str exp = test str do
               Assert.equal exp $ R.test nonEmptyRegex str
->>>>>>> origin/master
         nonEmptyTest "Houston" true
         nonEmptyTest "My Street" true
         nonEmptyTest "Ñóñá" true
