@@ -3,8 +3,7 @@ module Test.Main where
 import Prelude
 import Test.Examples
 import Test.MySolutions
-import Test.NoPeeking.Solutions  -- Note to reader: Delete this line
-
+--import Test.NoPeeking.Solutions  -- Note to reader: Delete this line
 import Control.Monad.Free (Free)
 import Data.Argonaut (JsonDecodeError(..), decodeJson, encodeJson)
 import Data.Either (Either(..), isLeft)
@@ -79,6 +78,8 @@ main =
           { a: 3.0, b: -6.0, c: 3.0 }
           { real: 1.0, imag: 0.0 }
           { real: 1.0, imag: 0.0 }
+
+{-  Move this block comment starting point to enable more tests
     suite "Exercise Group - JSON" do
       suite "Exercise - valuesOfMap" do
         test "Items" do
@@ -201,7 +202,6 @@ main =
             (decoded :: Either _ IntOrString) = decodeJson $ encodeJson 1.5
           Assert.assert "Got a Right, should be Left" $ isLeft decoded
 
-{-  Move this block comment starting point to enable more tests
 -}
 -- Put in ascending order by real, then imag components
 orderCpx :: Pair Complex -> Pair Complex
