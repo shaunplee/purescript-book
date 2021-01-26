@@ -1,12 +1,12 @@
 module Test.MySolutions where
 
 import Prelude
-import Data.Argonaut (Json, JsonDecodeError, decodeJson, encodeJson)
+import Data.Argonaut (class DecodeJson, class EncodeJson, Json, JsonDecodeError, decodeJson, encodeJson)
 import Data.Either (Either)
 import Data.Function.Uncurried (Fn3)
-import Data.Map
+import Data.Map (Map)
 import Data.Pair (Pair(..))
-import Data.Set
+import Data.Set (Set)
 import Test.Examples
 
 foreign import volumeFn :: Fn3 Number Number Number Number
@@ -31,3 +31,11 @@ foreign import valuesOfMapImpl :: Json -> Json
 
 valuesOfMap :: Map String Int -> Either JsonDecodeError (Set Int)
 valuesOfMap = decodeJson <<< valuesOfMapImpl <<< encodeJson
+
+valuesOfMapGeneric :: forall k v. EncodeJson k => Ord k => Ord v => DecodeJson v => EncodeJson v => Map k v -> Either JsonDecodeError (Set v)
+valuesOfMapGeneric = decodeJson <<< valuesOfMapImpl <<< encodeJson
+
+foreign import quadraticRootsSetImpl :: Json -> Json
+
+quadraticRootsSet :: Quadratic -> Either JsonDecodeError (Set Complex)
+quadraticRootsSet = encodeJson >>> quadraticRootsSetImpl >>> decodeJson

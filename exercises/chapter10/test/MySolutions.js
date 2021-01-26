@@ -48,11 +48,26 @@ exports.quadraticRootsImpl = pair => q => {
   return pair(pr)(nr);
 };
 
-exports.valuesOfMapImpl = m => {
-  let m = new Map(m);
+exports.valuesOfMapImpl = ma => {
+  let m = new Map(ma);
   let s = new Set();
   for (let value of m.values()) {
     s.add(value);
   }
   return Array.from(s);
+};
+
+exports.quadraticRootsSetImpl = q => {
+  let a = { real: (-q.b) / (2 * q.a), imag: 0.0 };
+  let b = { real: 0.0, imag: 0.0 };
+  let sq_disc = q.b * q.b - 4 * q.a * q.c;
+  if (sq_disc < 0.0) {
+    b = { real: 0.0, imag: (Math.sqrt(-sq_disc)) / (2 * q.a) };
+  } else {
+    b = { real: (Math.sqrt(sq_disc) / (2 * q.a)), imag: 0.0 };
+  }
+
+  let pr = this.addComplex(a)(b);
+  let nr = this.addComplex(a)(this.negateComplex(b));
+  return Array.from([pr, nr]);
 };
