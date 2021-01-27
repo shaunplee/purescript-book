@@ -1,10 +1,12 @@
 module Test.MySolutions where
 
 import Prelude
-import Data.Argonaut (class DecodeJson, class EncodeJson, Json, JsonDecodeError, decodeJson, encodeJson)
-import Data.Either (Either)
+import Data.Argonaut (class DecodeJson, class EncodeJson, Json, JsonDecodeError(..), decodeJson, encodeJson, fromString)
+import Data.Array ((!!))
+import Data.Either (Either(..))
 import Data.Function.Uncurried (Fn3)
 import Data.Map (Map)
+import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Pair (Pair(..))
 import Data.Set (Set)
 import Test.Examples
@@ -40,3 +42,29 @@ foreign import quadraticRootsSetImpl :: Json -> Json
 
 quadraticRootsSet :: Quadratic -> Either JsonDecodeError (Set Complex)
 quadraticRootsSet = encodeJson >>> quadraticRootsSetImpl >>> decodeJson
+
+jsonPairFromArr :: forall a. Array a -> Maybe (JsonPair a)
+jsonPairFromArr [ car, cdr ] = Just $ JsonPair $ Pair car cdr
+
+jsonPairFromArr _ = Nothing
+
+newtype JsonPair a
+  = JsonPair (Pair a)
+
+instance decodeJsonPair :: DecodeJson a => DecodeJson (JsonPair a) where
+  decodeJson json = do
+    arr <- decodeJson json
+    case arr of
+      [ car, cdr ] ->
+        JsonPair
+          <$> (Pair <$> (decodeJson car) <*> (decodeJson cdr))
+      [] -> Left $ AtIndex 0 MissingValue
+      [ _ ] -> Left $ AtIndex 1 MissingValue
+      _ -> Left $ UnexpectedValue (fromMaybe (fromString "") $ arr !! 2)
+
+quadraticRootsSafe :: Quadratic -> Either JsonDecodeError (Pair Complex)
+quadraticRootsSafe =
+  encodeJson
+    >>> quadraticRootsSetImpl
+    >>> decodeJson
+    >>> map (\(JsonPair p) -> p)
