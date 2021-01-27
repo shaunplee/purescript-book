@@ -9,6 +9,7 @@ import Data.Pair (Pair(..))
 import Data.Set (Set)
 import Test.Examples
 
+-- Note to reader: Add your solutions to this file
 foreign import volumeFn :: Fn3 Number Number Number Number
 
 foreign import volumeArrow :: Number -> Number -> Number -> Number
