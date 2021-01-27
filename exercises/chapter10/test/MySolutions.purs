@@ -1,7 +1,7 @@
 module Test.MySolutions where
 
 import Prelude
-import Data.Argonaut (class DecodeJson, class EncodeJson, Json, JsonDecodeError(..), decodeJson, encodeJson, fromString)
+import Data.Argonaut (class DecodeJson, class EncodeJson, Json, JsonDecodeError(..), decodeJson, encodeJson, fromString, jsonParser, stringify)
 import Data.Array ((!!))
 import Data.Either (Either(..))
 import Data.Function.Uncurried (Fn3)
@@ -68,3 +68,10 @@ quadraticRootsSafe =
     >>> quadraticRootsSetImpl
     >>> decodeJson
     >>> map (\(JsonPair p) -> p)
+
+parseAndDecodeArray2D :: String -> Either String (Array (Array Int))
+parseAndDecodeArray2D s = do
+  j <- jsonParser s
+  case decodeJson j of
+    Left err -> Left $ show err
+    Right arr -> Right arr
