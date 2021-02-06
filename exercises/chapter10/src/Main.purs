@@ -1,7 +1,6 @@
 module Main where
 
 import Prelude
-
 import Data.AddressBook (PhoneNumber, Person, examplePerson)
 import Data.AddressBook.Validation (Errors, validatePerson')
 import Data.Argonaut (Json, decodeJson, encodeJson, jsonParser, printJsonDecodeError, stringify)
@@ -11,10 +10,10 @@ import Data.Either (Either(..))
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
-import Effect.Alert (alert)
+import Effect.Alert (alert, confirm)
 import Effect.Console (log)
 import Effect.Exception (throw)
-import Effect.Storage (getItem, setItem)
+import Effect.Storage (getItem, removeItem, setItem)
 import React.Basic.DOM as D
 import React.Basic.DOM.Events (targetValue)
 import React.Basic.Events (handler, handler_)
@@ -107,7 +106,7 @@ mkAddressBookApp =
       validateAndSave = do
         log "Running validators"
         case validatePerson' person of
-          Left  errs        -> alert $ "There are " <> show (length errs) <> " validation errors."
+          Left errs -> alert $ "There are " <> show (length errs) <> " validation errors."
           Right validPerson -> do
             setItem "person" $ stringify $ encodeJson validPerson
             log "Saved"
@@ -122,6 +121,29 @@ mkAddressBookApp =
                   { className: "btn-primary btn"
                   , onClick: handler_ validateAndSave
                   , children: [ D.text "Save" ]
+                  }
+              ]
+          }
+
+      resetStorage :: Effect Unit
+      resetStorage = do
+        clear <- confirm "Are you sure you want to clear the address book?"
+        if clear then do
+          removeItem "person"
+          alert "Address book cleared"
+        else
+          pure unit
+
+      -- helper-function to render resetButton
+      resetButton :: R.JSX
+      resetButton =
+        D.label
+          { className: "form-group row col-form-label"
+          , children:
+              [ D.button
+                  { className: "btn-primary btn"
+                  , onClick: handler_ resetStorage
+                  , children: [ D.text "Reset" ]
                   }
               ]
           }
@@ -152,14 +174,27 @@ mkAddressBookApp =
                           ]
                       }
                   ]
-                <> [ saveButton ]
+                <> [ D.div
+                      { className: "container"
+                      , children:
+                          [ D.span
+                              { className: "d-inline"
+                              , children: [ saveButton ]
+                              }
+                          , D.span
+                              { className: "d-inline"
+                              , children: [ resetButton ]
+                              }
+                          ]
+                      }
+                  ]
           }
 
 processItem :: Json -> Either String Person
 processItem item = do
   jsonString <- lmap (\e -> "No string in local storage: " <> printJsonDecodeError e) $ decodeJson item
-  j          <- lmap (      "Cannot parse JSON string: "   <> _)                      $ jsonParser jsonString
-  lmap               (\e -> "Cannot decode Person: "       <> printJsonDecodeError e) $ decodeJson j
+  j <- lmap ("Cannot parse JSON string: " <> _) $ jsonParser jsonString
+  lmap (\e -> "Cannot decode Person: " <> printJsonDecodeError e) $ decodeJson j
 
 main :: Effect Unit
 main = do
@@ -178,10 +213,10 @@ main = do
       -- Retrieve person from local storage
       item <- getItem "person"
       initialPerson <- case processItem item of
-        Left  err -> do
+        Left err -> do
           alert $ "Error: " <> err <> ". Loading examplePerson"
           pure examplePerson
-        Right p   -> pure p
+        Right p -> pure p
       let
         -- Create JSX node from react component.
         app = element addressBookApp { initialPerson }

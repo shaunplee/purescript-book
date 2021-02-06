@@ -11,6 +11,7 @@ let overrides =
           , "quickcheck"
           , "free"
           , "strings"
+          , "stringutils"
           , "lists"
           , "js-timers"
           , "avar"
