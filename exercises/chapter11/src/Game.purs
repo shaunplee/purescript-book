@@ -2,6 +2,7 @@ module Game where
 
 import Prelude
 
+import Control.Monad.Except.Trans (ExceptT, throwError)
 import Control.Monad.RWS (RWS)
 import Control.Monad.Reader (ask)
 import Control.Monad.State (get, modify_, put)
@@ -18,7 +19,8 @@ import Data.Set as S
 
 type Log = L.List String
 
-type Game = RWS GameEnvironment Log GameState
+type Game
+  = ExceptT (L.List String) (RWS GameEnvironment Log GameState)
 
 describeRoom :: Game Unit
 describeRoom = do
@@ -40,7 +42,7 @@ pickUp item = do
                                 , inventory = newInventory
                                 }
           tell (L.singleton ("You now have the " <> show item))
-    _ -> tell (L.singleton "I don't see that item here.")
+    _ -> throwError (L.singleton "I don't see that item here.")
 
 move :: Int -> Int -> Game Unit
 move dx dy = modify_ (\(GameState state) -> GameState (state { player = updateCoords state.player }))
@@ -54,7 +56,7 @@ has item = do
   pure $ item `S.member` state.inventory
 
 use :: GameItem -> Game Unit
-use Candle = tell (L.singleton "I don't know what you want me to do with that.")
+use Candle = throwError (L.singleton "I don't know what you want me to do with that.")
 use Matches = do
   hasCandle <- has Candle
   if hasCandle
@@ -64,7 +66,21 @@ use Matches = do
                            , "Congratulations, " <> env.playerName <> "!"
                            , "You win!"
                            ])
-    else tell (L.singleton "You don't have anything to light.")
+    else throwError (L.singleton "You don't have anything to light.")
+
+cheat :: Game Unit
+cheat = do
+  GameState state <- get
+  let
+    newItems = M.empty
+
+    newInventory = S.union state.inventory (S.unions $ M.values state.items)
+  put
+    $ GameState
+        state
+          { items = newItems
+          , inventory = newInventory
+          }
 
 game :: Array String -> Game Unit
 game ["look"] = do
@@ -82,22 +98,29 @@ game ["west"]  = move (-1) 0
 game ["east"]  = move 1    0
 game ["take", item] =
   case readItem item of
-    Nothing -> tell (L.singleton "I don't know what item you are referring to.")
+    Nothing -> throwError (L.singleton "I don't know what item you are referring to.")
     Just gameItem -> pickUp gameItem
 game ["use", item] =
   case readItem item of
-    Nothing -> tell (L.singleton "I don't know what item you are referring to.")
+    Nothing -> throwError (L.singleton "I don't know what item you are referring to.")
     Just gameItem -> do
       hasItem <- has gameItem
       if hasItem
         then use gameItem
-        else tell (L.singleton "You don't have that item.")
+        else throwError (L.singleton "You don't have that item.")
 game ["debug"] = do
   GameEnvironment env <- ask
   if env.debugMode
     then do
       state :: GameState <- get
       tell (L.singleton (show state))
-    else tell (L.singleton "Not running in debug mode.")
+    else throwError (L.singleton "Not running in debug mode.")
+game [ "cheat" ] = do
+  GameEnvironment env <- ask
+  if env.cheatMode
+     then do
+       cheat
+       tell (L.singleton "Cheater!")
+     else throwError (L.singleton "Not running in cheat mode.")
 game [] = pure unit
 game _  = tell (L.singleton "I don't understand.")

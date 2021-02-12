@@ -1,7 +1,15 @@
 module Test.MySolutions where
 
+import Control.Alternative ((<|>))
+import Control.Monad.State.Class
+import Control.Monad.Writer.Class
 import Prelude
-import Data.Array (replicate)
+import Control.Monad.Except (ExceptT(..), runExceptT, throwError)
+import Control.Monad.Reader (Reader, ReaderT, ask, local, runReader, runReaderT)
+import Control.Monad.State (State, StateT, execState, get, put, runStateT)
+import Control.Monad.Trans.Class (lift)
+import Control.Monad.Writer (Writer, WriterT, execWriterT, runWriter, runWriterT, tell)
+import Data.Array (concat, many, replicate, some)
 import Data.Either (Either(..))
 import Data.Foldable (fold, intercalate, traverse_)
 import Data.Identity (Identity(..))
@@ -14,13 +22,6 @@ import Data.String.Common (joinWith)
 import Data.String.Pattern (Pattern(..))
 import Data.Traversable (sequence)
 import Data.Tuple (Tuple(..), snd)
-import Control.Monad.Except (ExceptT(..), runExceptT, throwError)
-import Control.Monad.Reader (Reader, ReaderT, ask, local, runReader, runReaderT)
-import Control.Monad.State (State, StateT, execState, get, put, runStateT)
-import Control.Monad.State.Class
-import Control.Monad.Trans.Class (lift)
-import Control.Monad.Writer (Writer, WriterT, execWriterT, runWriter, runWriterT, tell)
-import Control.Monad.Writer.Class
 
 -- Note to reader : Add your solutions to this file
 sumArray :: Array Int -> State Int Unit
@@ -107,25 +108,31 @@ type Log
 type Parser
   = StateT String (WriterT Log (ExceptT Errors Identity))
 
+type Parser'
+  = ExceptT Errors (StateT String (WriterT Log Identity))
+
 string :: String -> Parser String
 string needle = do
   s <- get
-  lift $ tell [ "The state is " <> s ]
+  tell [ "The state is " <> s ]
   case stripPrefix (Pattern needle) s of
     Just rest -> do
       put rest
       pure $ needle
-    Nothing -> lift $ lift $ throwError [ "Could not parse" ]
+    Nothing -> throwError [ "Could not parse" ]
 
-runParser :: Parser String -> String -> Either Errors (Tuple (Tuple String String) Log)
+runParser :: forall a. Parser a -> String -> Either Errors (Tuple (Tuple a String) Log)
 runParser p s = unwrap $ runExceptT $ runWriterT $ runStateT p s
+
+runParser' :: forall a. Parser' a -> String -> (Tuple (Tuple (Either Errors a) String) Log)
+runParser' p s = unwrap $ runWriterT $ runStateT (runExceptT p) s
 
 type Doc'
   = WriterT Log (ReaderT Level Identity)
 
 line' :: String -> Doc' Unit
 line' s = do
-  level <- lift ask
+  level <- ask
   tell $ [ fold (replicate level " ") <> s ]
   pure unit
 
@@ -135,11 +142,13 @@ indent' d = local (2 + _) d
 render' :: Doc' Unit -> String
 render' d = joinWith "\n" $ snd $ unwrap $ runReaderT (runWriterT d) 0
 
--- cat' :: Array (Doc' Unit) -> Doc' Unit
--- cat' ds =
---   traverse_
---     ( \d -> do
---         ls <- execWriterT d
---         tell ls
---     )
---     ds
+asThenBs :: Parser (Array String)
+asThenBs =
+  map concat
+    $ sequence
+        [ some (string "a")
+        , many (string "b")
+        ]
+
+asAndBs :: Parser (Array String)
+asAndBs = some (string "a" <|> string "b")
