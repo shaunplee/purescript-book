@@ -13,6 +13,7 @@ You can edit this file as you like.
     , "random"
     , "refs"
     , "web-dom"
+    , "web-uievents"
     ]
 , packages =
     ./packages.dhall
