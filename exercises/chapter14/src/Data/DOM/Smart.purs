@@ -7,14 +7,17 @@ module Data.DOM.Smart
   , a
   , p
   , img
+  , input
 
   , href
   , _class
+  , disabled
   , src
   , width
   , height
 
   , attribute, (:=)
+  , emptyAttribute
   , text
   , elem
 
@@ -38,7 +41,7 @@ data Content
 
 newtype Attribute = Attribute
   { key          :: String
-  , value        :: String
+  , value        :: Maybe String
   }
 
 element :: String -> Array Attribute -> Maybe (Array Content) -> Element
@@ -59,10 +62,16 @@ newtype AttributeKey = AttributeKey String
 attribute :: AttributeKey -> String -> Attribute
 attribute (AttributeKey key) value = Attribute
   { key: key
-  , value: value
+  , value: Just value
   }
 
 infix 4 attribute as :=
+
+emptyAttribute :: AttributeKey -> Attribute
+emptyAttribute (AttributeKey key) = Attribute
+                                    { key: key
+                                    , value: Nothing
+                                    }
 
 a :: Array Attribute -> Array Content -> Element
 a attribs content = element "a" attribs (Just content)
@@ -72,6 +81,9 @@ p attribs content = element "p" attribs (Just content)
 
 img :: Array Attribute -> Element
 img attribs = element "img" attribs Nothing
+
+input :: Array Attribute -> Array Content -> Element
+input attribs content = element "input" attribs (Just content)
 
 href :: AttributeKey
 href = AttributeKey "href"
@@ -88,6 +100,9 @@ width = AttributeKey "width"
 height :: AttributeKey
 height = AttributeKey "height"
 
+disabled :: AttributeKey
+disabled = AttributeKey "disabled"
+
 render :: Element -> String
 render (Element e) =
     "<" <> e.name <>
@@ -95,7 +110,9 @@ render (Element e) =
     renderContent e.content
   where
     renderAttribute :: Attribute -> String
-    renderAttribute (Attribute x) = x.key <> "=\"" <> x.value <> "\""
+    renderAttribute (Attribute x) = case x.value of
+                                         Just val -> x.key <> "=\"" <> val <> "\""
+                                         Nothing -> x.key
 
     renderContent :: Maybe (Array Content) -> String
     renderContent Nothing = " />"
